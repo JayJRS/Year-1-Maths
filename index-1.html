@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Maths Adventure! 🌟</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --sky: #4FC3F7; --sun: #FFD600; --grass: #66BB6A;
+    --coral: #FF7043; --lavender: #9575CD; --mint: #26C6DA;
+    --white: #FFFDE7; --dark: #37474F;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #e0f7fa 0%, #fff9c4 50%, #f3e5f5 100%);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 16px; overflow-x: hidden;
+  }
+  .bg-shape { position:fixed;z-index:0;border-radius:50%;opacity:.13;pointer-events:none; }
+  .bg-shape.s1 { width:280px;height:280px;background:var(--sky);top:-60px;left:-80px; }
+  .bg-shape.s2 { width:200px;height:200px;background:var(--sun);bottom:40px;right:-60px; }
+  .bg-shape.s3 { width:150px;height:150px;background:var(--grass);top:40%;left:-40px; }
+
+  header { z-index:1;text-align:center;margin-bottom:18px; }
+  header h1 {
+    font-family:'Baloo 2',cursive; font-size:clamp(2rem,6vw,3rem);
+    color:var(--coral); text-shadow:3px 3px 0px #FFD600,5px 5px 0px #FF704322;
+  }
+  header p { font-size:1.05rem;color:var(--lavender);font-weight:700;margin-top:4px; }
+  .stars-display { font-size:1.3rem;margin-top:6px;letter-spacing:4px; }
+
+  /* Loading */
+  #loading { z-index:1;font-family:'Baloo 2',cursive;font-size:1.4rem;color:var(--lavender);padding:40px; }
+
+  /* Topic screen */
+  #topic-screen { z-index:1;display:none;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:560px; }
+  #topic-screen h2 { font-family:'Baloo 2',cursive;font-size:1.5rem;color:var(--dark);text-align:center; }
+  .topic-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%; }
+  .topic-btn {
+    background:white;border:3px solid transparent;border-radius:20px;
+    padding:18px 12px;font-family:'Baloo 2',cursive;font-size:1.1rem;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    box-shadow:0 6px 18px rgba(0,0,0,.10);transition:transform .2s,box-shadow .2s;
+  }
+  .topic-btn:hover { transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,.15); }
+  .topic-btn .icon { font-size:2.4rem; }
+  .topic-btn.add { border-color:#66BB6A;background:#F1F8E9;color:#2E7D32; }
+  .topic-btn.sub { border-color:#FF7043;background:#FBE9E7;color:#BF360C; }
+  .topic-btn.mul { border-color:#9575CD;background:#EDE7F6;color:#4527A0; }
+  .topic-btn.div { border-color:#26C6DA;background:#E0F7FA;color:#00838F; }
+  .topic-btn.mea { border-color:#FFD600;background:#FFFDE7;color:#F57F17; }
+  .topic-btn.sha { border-color:#EC407A;background:#FCE4EC;color:#880E4F; }
+
+  /* Question screen */
+  #question-screen { z-index:1;display:none;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:560px; }
+  .progress-bar-wrap { width:100%;background:rgba(0,0,0,.08);border-radius:99px;height:12px;overflow:hidden; }
+  .progress-bar-fill { height:100%;background:linear-gradient(90deg,#66BB6A,#FFD600);border-radius:99px;transition:width .5s ease; }
+  .topic-label { font-family:'Baloo 2',cursive;font-size:1rem;color:var(--lavender);letter-spacing:1px;text-transform:uppercase; }
+
+  .question-card {
+    background:white;border-radius:28px;padding:28px 24px;width:100%;
+    box-shadow:0 8px 30px rgba(0,0,0,.12);position:relative;overflow:hidden;
+  }
+  .question-card::before {
+    content:'';position:absolute;top:0;left:0;right:0;height:7px;
+    background:linear-gradient(90deg,var(--coral),var(--sun),var(--grass));
+  }
+  .question-emoji { font-size:3rem;text-align:center;display:block;margin-bottom:10px; }
+  .question-text { font-size:clamp(1.1rem,3.5vw,1.3rem);color:var(--dark);line-height:1.6;font-weight:700;text-align:center; }
+  .hint-box {
+    background:#FFF9C4;border-left:5px solid var(--sun);border-radius:12px;
+    padding:10px 14px;font-size:.95rem;color:#795548;font-weight:700;margin-top:10px;
+  }
+
+  .options-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%; }
+  .option-btn {
+    background:white;border:3px solid #E0E0E0;border-radius:18px;
+    padding:16px 10px;font-family:'Baloo 2',cursive;font-size:1.25rem;
+    cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(0,0,0,.07);
+  }
+  .option-btn:hover:not(:disabled) { border-color:var(--sky);background:#E1F5FE;transform:scale(1.04); }
+  .option-btn.correct { background:#C8E6C9;border-color:#388E3C;color:#1B5E20;animation:pop .4s ease; }
+  .option-btn.wrong   { background:#FFCDD2;border-color:#C62828;color:#7F0000;animation:shake .4s ease; }
+  @keyframes pop   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+  .feedback-box {
+    width:100%;border-radius:20px;padding:18px 20px;font-size:1rem;
+    font-weight:700;line-height:1.6;display:none;animation:fadeIn .4s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .feedback-box.correct { background:#E8F5E9;border:3px solid #66BB6A;color:#1B5E20; }
+  .feedback-box.wrong   { background:#FFF3E0;border:3px solid #FFA726;color:#E65100; }
+  .feedback-box .fb-title { font-family:'Baloo 2',cursive;font-size:1.2rem;margin-bottom:6px; }
+
+  .btn-next {
+    background:linear-gradient(135deg,#66BB6A,#26A69A);color:white;border:none;
+    border-radius:99px;padding:14px 38px;font-family:'Baloo 2',cursive;font-size:1.2rem;
+    cursor:pointer;box-shadow:0 6px 18px rgba(102,187,106,.35);
+    transition:transform .2s,box-shadow .2s;display:none;
+  }
+  .btn-next:hover { transform:translateY(-3px);box-shadow:0 10px 24px rgba(102,187,106,.4); }
+  .btn-home {
+    background:transparent;border:2.5px solid var(--lavender);color:var(--lavender);
+    border-radius:99px;padding:10px 26px;font-family:'Baloo 2',cursive;font-size:1rem;cursor:pointer;transition:all .2s;
+  }
+  .btn-home:hover { background:var(--lavender);color:white; }
+
+  /* End screen */
+  #end-screen { z-index:1;display:none;flex-direction:column;align-items:center;gap:16px;text-align:center;max-width:480px; }
+  .trophy { font-size:5rem;animation:bounce 1s infinite alternate; }
+  @keyframes bounce { from{transform:translateY(0)} to{transform:translateY(-14px)} }
+  #end-screen h2 { font-family:'Baloo 2',cursive;font-size:2rem;color:var(--coral); }
+  #end-screen p  { font-size:1.1rem;color:var(--dark);font-weight:700; }
+  .score-badge {
+    background:var(--sun);border-radius:99px;padding:14px 36px;
+    font-family:'Baloo 2',cursive;font-size:1.5rem;color:#5D4037;
+    box-shadow:0 6px 20px rgba(255,214,0,.4);
+  }
+  .btn-play-again {
+    background:linear-gradient(135deg,var(--coral),#FF5252);color:white;border:none;
+    border-radius:99px;padding:16px 44px;font-family:'Baloo 2',cursive;font-size:1.3rem;
+    cursor:pointer;box-shadow:0 6px 20px rgba(255,112,67,.35);transition:transform .2s;
+  }
+  .btn-play-again:hover { transform:scale(1.06); }
+  #confetti-canvas { position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999; }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<div class="bg-shape s1"></div>
+<div class="bg-shape s2"></div>
+<div class="bg-shape s3"></div>
+
+<header>
+  <h1>🌟 Maths Adventure!</h1>
+  <p>Year 1 · Cambridge Curriculum</p>
+  <div class="stars-display" id="stars-display"></div>
+</header>
+
+<div id="loading">⏳ Loading questions...</div>
+
+<!-- TOPIC SCREEN — buttons built automatically from questions.json -->
+<div id="topic-screen">
+  <h2>👇 Pick a topic to start!</h2>
+  <div class="topic-grid" id="topic-grid"></div>
+</div>
+
+<!-- QUESTION SCREEN -->
+<div id="question-screen">
+  <div class="progress-bar-wrap" style="width:100%;max-width:560px">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="topic-label" id="topic-label"></div>
+  <div class="question-card">
+    <span class="question-emoji" id="q-emoji">🌟</span>
+    <div class="question-text" id="q-text"></div>
+    <div class="hint-box" id="q-hint" style="display:none"></div>
+  </div>
+  <div class="options-grid" id="options-grid"></div>
+  <div class="feedback-box" id="feedback-box"></div>
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next Question ➡️</button>
+  <button class="btn-home" onclick="goHome()">🏠 Choose Another Topic</button>
+</div>
+
+<!-- END SCREEN -->
+<div id="end-screen">
+  <div class="trophy">🏆</div>
+  <h2 id="end-title">Amazing Job!</h2>
+  <p id="end-msg"></p>
+  <div class="score-badge" id="score-badge"></div>
+  <div class="stars-display" id="end-stars"></div>
+  <button class="btn-play-again" onclick="goHome()">🎮 Play Again!</button>
+</div>
+
+<script>
+// ── Topic button styles (one per topic key) ──────────────────────────────────
+const TOPIC_STYLES = {
+  addition:       { cls: 'add', icon: '➕' },
+  subtraction:    { cls: 'sub', icon: '➖' },
+  multiplication: { cls: 'mul', icon: '✖️' },
+  division:       { cls: 'div', icon: '➗' },
+  measurement:    { cls: 'mea', icon: '📏' },
+  shapes:         { cls: 'sha', icon: '🔺' }
+};
+
+// ── State ────────────────────────────────────────────────────────────────────
+let TOPICS = {};          // loaded from questions.json
+let currentTopic = null;
+let questions = [];
+let currentIndex = 0;
+let score = 0;
+let totalStars = 0;
+let answered = false;
+
+// ── Load questions.json on startup ───────────────────────────────────────────
+fetch('questions.json')
+  .then(r => r.json())
+  .then(data => {
+    TOPICS = data;
+    document.getElementById('loading').style.display = 'none';
+    buildTopicButtons();
+    showScreen('topic');
+  })
+  .catch(() => {
+    document.getElementById('loading').textContent =
+      '❌ Could not load questions.json — make sure both files are in the same folder!';
+  });
+
+// ── Build topic buttons dynamically from loaded data ─────────────────────────
+function buildTopicButtons() {
+  const grid = document.getElementById('topic-grid');
+  grid.innerHTML = '';
+  Object.keys(TOPICS).forEach(key => {
+    const topic = TOPICS[key];
+    const style = TOPIC_STYLES[key] || { cls: 'add', icon: '📚' };
+    const btn = document.createElement('button');
+    btn.className = `topic-btn ${style.cls}`;
+    btn.innerHTML = `<span class="icon">${style.icon}</span>${topic.label.replace(/^.+?\s/, '')}`;
+    btn.onclick = () => startTopic(key);
+    grid.appendChild(btn);
+  });
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+function showScreen(name) {
+  $('topic-screen').style.display    = name === 'topic'    ? 'flex' : 'none';
+  $('question-screen').style.display = name === 'question' ? 'flex' : 'none';
+  $('end-screen').style.display      = name === 'end'      ? 'flex' : 'none';
+}
+
+function updateStarsDisplay() {
+  $('stars-display').textContent = '⭐'.repeat(Math.min(totalStars, 10));
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Topic start ──────────────────────────────────────────────────────────────
+function startTopic(topicKey) {
+  currentTopic = topicKey;
+  questions = shuffle([...TOPICS[topicKey].questions]).slice(0, 5);
+  currentIndex = 0;
+  score = 0;
+  showScreen('question');
+  $('topic-label').textContent = TOPICS[topicKey].label;
+  renderQuestion();
+}
+
+// ── Render one question ──────────────────────────────────────────────────────
+function renderQuestion() {
+  answered = false;
+  const q = questions[currentIndex];
+  const style = TOPIC_STYLES[currentTopic] || { icon: '📚' };
+
+  $('q-emoji').textContent = style.icon;
+  $('q-text').textContent  = q.q;
+  $('q-hint').style.display = q.hint ? 'block' : 'none';
+  if (q.hint) $('q-hint').textContent = '💡 Hint: ' + q.hint;
+
+  $('progress-fill').style.width = (currentIndex / questions.length * 100) + '%';
+
+  const grid = $('options-grid');
+  grid.innerHTML = '';
+  shuffle(q.opts).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => checkAnswer(opt, btn);
+    grid.appendChild(btn);
+  });
+
+  $('feedback-box').style.display = 'none';
+  $('feedback-box').className = 'feedback-box';
+  $('btn-next').style.display = 'none';
+}
+
+// ── Check answer ─────────────────────────────────────────────────────────────
+function checkAnswer(selected, btn) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentIndex];
+  // loose == so "Square" == "Square" and 7 == "7" both work
+  const correct = selected == q.ans;
+
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent == q.ans) b.classList.add('correct');
+  });
+
+  const fb = $('feedback-box');
+  if (correct) {
+    score++;
+    totalStars++;
+    updateStarsDisplay();
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = `<div class="fb-title">🌟 Fantastic! That's correct!</div>
+      Well done! The answer is <strong>${q.ans}</strong>. You are brilliant! 🎉`;
+    launchConfetti();
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = `<div class="fb-title">🤔 Not quite — let's try together!</div>
+      The correct answer is <strong>${q.ans}</strong>.<br><br>
+      💡 <em>${q.hint || 'Have another look at the question!'}</em><br><br>
+      🔁 <strong>Quick practice:</strong> ${getSimilarProblem(q)}`;
+  }
+
+  fb.style.display = 'block';
+  $('btn-next').style.display = 'block';
+  $('btn-next').textContent =
+    currentIndex < questions.length - 1 ? 'Next Question ➡️' : 'See My Score 🏆';
+}
+
+// ── Similar practice problem shown after a wrong answer ───────────────────────
+function getSimilarProblem(q) {
+  const t = currentTopic;
+  if (t === 'addition')       { const a=rnd(1,5),b=rnd(1,5); return `${a} 🍎 + ${b} more = <strong>${a+b}</strong>`; }
+  if (t === 'subtraction')    { const a=rnd(5,9),b=rnd(1,4); return `${a} 🍓 − ${b} eaten = <strong>${a-b}</strong>`; }
+  if (t === 'multiplication') { const a=2,b=rnd(2,5); return `${a} groups of ${b} = <strong>${a*b}</strong>`; }
+  if (t === 'division')       { const b=2,a=b*rnd(2,5); return `${a} shared by ${b} = <strong>${a/b}</strong> each`; }
+  if (t === 'measurement')    { const a=rnd(6,10),b=rnd(1,4); return `${a}cm − ${b}cm = <strong>${a-b}cm</strong>`; }
+  if (t === 'shapes')         return 'Triangle=3 sides 🔺 | Square=4 equal sides 🟦 | Circle=0 corners ⭕';
+  return '';
+}
+function rnd(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+
+// ── Next question / end ───────────────────────────────────────────────────────
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= questions.length) showEnd();
+  else renderQuestion();
+}
+
+function showEnd() {
+  showScreen('end');
+  $('progress-fill').style.width = '100%';
+  const pct = score / questions.length;
+  let title, msg, stars;
+  if (pct === 1)    { title='🌟 Perfect Score!'; msg='You got everything right! Maths Superstar!'; stars='⭐⭐⭐'; launchConfetti(); }
+  else if (pct>=.6) { title='🎉 Great Job!';    msg='Nearly there! Keep practising! 💪';         stars='⭐⭐'; }
+  else              { title='😊 Good Try!';     msg='Don\'t give up! Try again! 🌈';             stars='⭐'; }
+  $('end-title').textContent   = title;
+  $('end-msg').textContent     = msg;
+  $('score-badge').textContent = `${score} out of ${questions.length} correct!`;
+  $('end-stars').textContent   = stars;
+}
+
+function goHome() { showScreen('topic'); }
+
+// ── Confetti ──────────────────────────────────────────────────────────────────
+function launchConfetti() {
+  const canvas = $('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = innerWidth;
+  canvas.height = innerHeight;
+  const colors = ['#FF7043','#FFD600','#66BB6A','#9575CD','#26C6DA','#EC407A'];
+  const pieces = Array.from({length:80}, () => ({
+    x: Math.random()*canvas.width, y: Math.random()*-200,
+    r: rnd(4,10), d: Math.random()*1.5+0.5,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    tilt: Math.random()*20-10, tiltSpeed: Math.random()*.1-.05
+  }));
+  let frame = 0;
+  (function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p => {
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y, p.r, p.r*.5, p.tilt, 0, Math.PI*2);
+      ctx.fillStyle = p.color; ctx.fill();
+      p.y += p.d*4; p.x += Math.sin(frame*.02)*1.5; p.tilt += p.tiltSpeed;
+      if (p.y > canvas.height) { p.y = -20; p.x = Math.random()*canvas.width; }
+    });
+    if (++frame < 120) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+updateStarsDisplay();
+</script>
+</body>
+</html>
