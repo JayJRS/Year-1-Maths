@@ -35,6 +35,7 @@
       }
     ]
   },
+
   "subtraction": {
     "label": "➖ Subtraction",
     "emoji": "➖",
@@ -71,6 +72,7 @@
       }
     ]
   },
+
   "multiplication": {
     "label": "✖️ Multiplication",
     "emoji": "✖️",
@@ -107,6 +109,7 @@
       }
     ]
   },
+
   "division": {
     "label": "➗ Division",
     "emoji": "➗",
@@ -143,6 +146,7 @@
       }
     ]
   },
+
   "measurement": {
     "label": "📏 Measurement",
     "emoji": "📏",
@@ -179,6 +183,7 @@
       }
     ]
   },
+
   "shapes": {
     "label": "🔺 Shapes",
     "emoji": "🔺",
@@ -212,6 +217,61 @@
         "ans": 4,
         "opts": [3, 4, 5, 6],
         "hint": "Count: top, bottom, left, right = 4 sides!"
+      }
+    ]
+  },
+
+  "aeis": {
+    "label": "📝 AEIS Exam Practice",
+    "emoji": "📝",
+    "questions": [
+      {
+        "q": "Add 26 to 9. The answer is 3 tens and ___ ones.",
+        "ans": 5,
+        "opts": [3, 4, 5, 6],
+        "hint": "26 + 9 = 35. 35 = 3 tens and ? ones"
+      },
+      {
+        "q": "Sarah went to the cinema to watch a movie at 8 pm 🎬. The movie was 3 hours long. What time did she finish watching the movie?",
+        "ans": "11 pm",
+        "opts": ["9 pm", "11 pm", "9 am", "11 am"],
+        "hint": "Start time 8 pm + 3 hours = ?"
+      },
+      {
+        "q": "The mass of a box is 5 kg. What is the mass of 4 such boxes? 📦📦📦📦",
+        "ans": "20 kg",
+        "opts": ["10 kg", "15 kg", "9 kg", "20 kg"],
+        "hint": "4 groups of 5 kg = 4 × 5 = ?"
+      },
+      {
+        "q": "A square 🟦 has how many sides?",
+        "ans": 4,
+        "opts": [0, 4, 3, 6],
+        "hint": "Count the sides of a square: top, bottom, left, right!"
+      },
+      {
+        "q": "97 − 39 = ___",
+        "ans": 58,
+        "opts": [58, 57, 126, 136],
+        "hint": "97 - 39. Try 97 - 40 = 57, then add 1 back = 58!"
+      },
+      {
+        "q": "John has 44 sweets 🍬. His sister has 28 sweets. How many sweets do they have altogether?",
+        "ans": 72,
+        "opts": [12, 16, 72, 76],
+        "hint": "Altogether means ADD! 44 + 28 = ?"
+      },
+      {
+        "q": "Dan has ten 50-cent coins 🪙. How many $1 coins can he exchange for all his 50-cent coins?",
+        "ans": 5,
+        "opts": [20, 15, 10, 5],
+        "hint": "Two 50-cent coins = one $1 coin. So 10 ÷ 2 = ?"
+      },
+      {
+        "q": "Peter can go home using 2 different roads and 2 different paths. How many different ways are there for Peter to go home?",
+        "ans": 4,
+        "opts": [1, 2, 3, 4],
+        "hint": "2 roads × 2 paths = ? different ways"
       }
     ]
   }

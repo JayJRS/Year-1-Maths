@@ -51,7 +51,8 @@
   .topic-btn.mul { border-color:#9575CD;background:#EDE7F6;color:#4527A0; }
   .topic-btn.div { border-color:#26C6DA;background:#E0F7FA;color:#00838F; }
   .topic-btn.mea { border-color:#FFD600;background:#FFFDE7;color:#F57F17; }
-  .topic-btn.sha { border-color:#EC407A;background:#FCE4EC;color:#880E4F; }
+  .topic-btn.sha  { border-color:#EC407A;background:#FCE4EC;color:#880E4F; }
+  .topic-btn.aeis { border-color:#5C6BC0;background:#E8EAF6;color:#283593; }
 
   /* Question screen */
   #question-screen { z-index:1;display:none;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:560px; }
@@ -72,7 +73,16 @@
   .hint-box {
     background:#FFF9C4;border-left:5px solid var(--sun);border-radius:12px;
     padding:10px 14px;font-size:.95rem;color:#795548;font-weight:700;margin-top:10px;
+    display:none;
   }
+  .btn-hint {
+    margin-top:10px;background:transparent;border:2.5px dashed var(--sun);
+    border-radius:99px;padding:9px 22px;font-family:'Baloo 2',cursive;
+    font-size:1rem;color:#F57F17;cursor:pointer;transition:all .2s;width:100%;
+  }
+  .btn-hint:hover:not(:disabled) { background:#FFF9C4; }
+  .btn-hint:disabled { opacity:.45;cursor:not-allowed; }
+  .star-cost { font-size:.85rem;color:#aaa;margin-top:4px;text-align:center; }
 
   .options-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%; }
   .option-btn {
@@ -158,7 +168,9 @@
   <div class="question-card">
     <span class="question-emoji" id="q-emoji">🌟</span>
     <div class="question-text" id="q-text"></div>
-    <div class="hint-box" id="q-hint" style="display:none"></div>
+    <div class="hint-box" id="q-hint"></div>
+    <button class="btn-hint" id="btn-hint" onclick="useHint()">💡 Use a Hint</button>
+    <div class="star-cost" id="hint-cost">costs 1 ⭐ star</div>
   </div>
   <div class="options-grid" id="options-grid"></div>
   <div class="feedback-box" id="feedback-box"></div>
@@ -184,7 +196,8 @@ const TOPIC_STYLES = {
   multiplication: { cls: 'mul', icon: '✖️' },
   division:       { cls: 'div', icon: '➗' },
   measurement:    { cls: 'mea', icon: '📏' },
-  shapes:         { cls: 'sha', icon: '🔺' }
+  shapes:         { cls: 'sha', icon: '🔺' },
+  aeis:           { cls: 'aeis', icon: '📝' }
 };
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -266,8 +279,12 @@ function renderQuestion() {
 
   $('q-emoji').textContent = style.icon;
   $('q-text').textContent  = q.q;
-  $('q-hint').style.display = q.hint ? 'block' : 'none';
-  if (q.hint) $('q-hint').textContent = '💡 Hint: ' + q.hint;
+  // Reset hint button
+  $('q-hint').style.display = 'none';
+  $('q-hint').textContent   = '';
+  $('btn-hint').disabled    = false;
+  $('btn-hint').textContent = '💡 Use a Hint';
+  $('hint-cost').style.display = 'block';
 
   $('progress-fill').style.width = (currentIndex / questions.length * 100) + '%';
 
@@ -281,9 +298,31 @@ function renderQuestion() {
     grid.appendChild(btn);
   });
 
+  $('btn-hint').disabled = true;
+  $('hint-cost').style.display = 'none';
   $('feedback-box').style.display = 'none';
   $('feedback-box').className = 'feedback-box';
   $('btn-next').style.display = 'none';
+}
+
+// ── Use Hint (costs 1 star) ───────────────────────────────────────────────────
+function useHint() {
+  if (answered) return;
+  const q = questions[currentIndex];
+  if (!q.hint) return;
+
+  // Deduct a star (minimum 0)
+  if (totalStars > 0) totalStars--;
+  updateStarsDisplay();
+
+  // Show hint
+  $('q-hint').textContent = '💡 ' + q.hint;
+  $('q-hint').style.display = 'block';
+
+  // Disable hint button so it can't be used again on same question
+  $('btn-hint').disabled = true;
+  $('btn-hint').textContent = '💡 Hint used! (−1 ⭐)';
+  $('hint-cost').style.display = 'none';
 }
 
 // ── Check answer ─────────────────────────────────────────────────────────────
